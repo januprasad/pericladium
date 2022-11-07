@@ -63,15 +63,15 @@ class RatingUIStateViewModel @Inject constructor() : ViewModel() {
                         )
                     }
                     when (currentSelectionCount[position]) {
-                        0 -> {
+                        in 0..1 -> {
                             label.value = "Bad"
                         }
 
-                        2 -> {
+                        in 1..2 -> {
                             label.value = "Average"
                         }
 
-                        4 -> {
+                        in 2..4 -> {
                             label.value = "Good"
                         }
                     }
