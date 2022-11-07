@@ -20,6 +20,7 @@ fun getRatingList(): SnapshotStateList<RatingIcon> {
 @HiltViewModel
 class RatingUIStateViewModel @Inject constructor() : ViewModel() {
     private var _ratingUIState = mutableStateOf(RatingUIState(getRatingList()))
+    var displayLabel = mutableStateOf("")
     val ratingUIState = _ratingUIState
 
     var currentSelectionCount = 0
@@ -54,6 +55,20 @@ class RatingUIStateViewModel @Inject constructor() : ViewModel() {
                     _ratingUIState.value = ratingUIState.value.copy(
                         snapshotStateList = modList
                     )
+
+                    when (currentSelectionCount) {
+                        0 -> {
+                            displayLabel.value = "Bad"
+                        }
+
+                        2 -> {
+                            displayLabel.value = "Average"
+                        }
+
+                        4 -> {
+                            displayLabel.value = "Good"
+                        }
+                    }
                 }
             }
         }
