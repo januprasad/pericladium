@@ -67,6 +67,10 @@ class RatingUIStateViewModel @Inject constructor() : ViewModel() {
                             label.value = "Bad"
                         }
 
+                        1 -> {
+                            label.value = "Bad"
+                        }
+
                         2 -> {
                             label.value = "Average"
                         }
