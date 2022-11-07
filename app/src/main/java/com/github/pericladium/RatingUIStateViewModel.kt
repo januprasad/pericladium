@@ -19,54 +19,60 @@ fun getRatingList(): SnapshotStateList<RatingIcon> {
 
 @HiltViewModel
 class RatingUIStateViewModel @Inject constructor() : ViewModel() {
-    private var _ratingUIState = mutableStateOf(RatingUIState(getRatingList()))
-    var displayLabel = mutableStateOf("")
-    val ratingUIState = _ratingUIState
+    private var _ratingUIState = mutableStateOf(
+        MultipleRatingBarUIState(
+            mutableStateListOf(
+                RatingUIState(
+                    getRatingList()
+                ),
+                RatingUIState(
+                    getRatingList()
+                )
+            )
+        )
+    )
 
-    var currentSelectionCount = 0
+    val ratingUIState = _ratingUIState
+    var currentSelectionCount: MutableList<Int> = mutableListOf(0, 0)
     val maxListSize = getRatingList().size
 
-    fun onUIEvent(event: UIEvent.InputEvents) {
+    fun onUIEvent(event: UIEvent.InputEvents, position: Int) {
         when (event) {
-            is UIEvent.InputEvents.Down -> {
+            is UIEvent.InputEvents.UnSelect -> {
                 // clear
-                val modList = ratingUIState.value.snapshotStateList
+                val ratingBar = _ratingUIState.value.snapshotRatingUIStateList[position]
+                val modList = ratingBar.snapshotStateList
                 for (i in 0 until maxListSize) {
                     modList[i] = modList[i].copy(
                         isSelected = false
                     )
                 }
-                _ratingUIState.value = ratingUIState.value.copy(
-                    snapshotStateList = modList
-                )
-                currentSelectionCount = 0
-                onUIEvent(UIEvent.InputEvents.Up(event.id))
+                currentSelectionCount[position] = 1
+                onUIEvent(UIEvent.InputEvents.Select(event.id), position)
             }
 
-            is UIEvent.InputEvents.Up -> {
-                if (currentSelectionCount <= event.id) {
-                    currentSelectionCount = event.id
-                    val modList = ratingUIState.value.snapshotStateList
-                    for (i in 0 until currentSelectionCount + 1) {
+            is UIEvent.InputEvents.Select -> {
+                if (currentSelectionCount[position] <= event.id) {
+                    currentSelectionCount[position] = event.id
+                    val ratingBar = _ratingUIState.value.snapshotRatingUIStateList[position]
+                    val label = ratingBar.displayLabel
+                    val modList = ratingBar.snapshotStateList
+                    for (i in 0 until currentSelectionCount[position] + 1) {
                         modList[i] = modList[i].copy(
                             isSelected = true
                         )
                     }
-                    _ratingUIState.value = ratingUIState.value.copy(
-                        snapshotStateList = modList
-                    )
-
-                    when (currentSelectionCount) {
+                    when (currentSelectionCount[position]) {
                         0 -> {
-                            displayLabel.value = "Bad"
+                            label.value = "Bad"
                         }
 
                         2 -> {
-                            displayLabel.value = "Average"
+                            label.value = "Average"
                         }
 
                         4 -> {
-                            displayLabel.value = "Good"
+                            label.value = "Good"
                         }
                     }
                 }

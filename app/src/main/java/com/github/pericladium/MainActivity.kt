@@ -44,14 +44,23 @@ class MainActivity : ComponentActivity() {
                         uiViewModel.ratingUIState
                     }
 
-                    val label by remember {
-                        uiViewModel.displayLabel
+                    val displayLabel1 by remember {
+                        uiState.snapshotRatingUIStateList[0].displayLabel
                     }
+
+                    val displayLabel2 by remember {
+                        uiState.snapshotRatingUIStateList[1].displayLabel
+                    }
+
                     Column(modifier = Modifier.fillMaxSize().padding(10.dp)) {
-                        RatingStar(uiState) { state ->
-                            uiViewModel.onUIEvent(state)
+                        RatingStar(uiState.snapshotRatingUIStateList[0]) { state ->
+                            uiViewModel.onUIEvent(state, 0)
                         }
-                        Text(text = label, style = MaterialTheme.typography.headlineLarge)
+                        Text(text = displayLabel1, style = MaterialTheme.typography.headlineLarge)
+                        RatingStar(uiState.snapshotRatingUIStateList[1]) { state ->
+                            uiViewModel.onUIEvent(state, 1)
+                        }
+                        Text(text = displayLabel2, style = MaterialTheme.typography.headlineLarge)
                     }
                 }
             }
@@ -72,9 +81,9 @@ fun RatingStar(uiState: RatingUIState, callback: (UIEvent.InputEvents) -> Unit) 
                 modifier = Modifier.size(60.dp).clickable {
                     val item = uiState.snapshotStateList[it]
                     if (item.isSelected) {
-                        callback(UIEvent.InputEvents.Down(it))
+                        callback(UIEvent.InputEvents.UnSelect(it))
                     } else {
-                        callback(UIEvent.InputEvents.Up(it))
+                        callback(UIEvent.InputEvents.Select(it))
                     }
                 },
                 colors = CardDefaults.cardColors(
