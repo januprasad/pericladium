@@ -47,7 +47,7 @@ class RatingUIStateViewModel @Inject constructor() : ViewModel() {
                         isSelected = false
                     )
                 }
-                currentSelectionCount[position] = 1
+                currentSelectionCount[position] = 0
                 onUIEvent(UIEvent.InputEvents.Select(event.id), position)
             }
 
@@ -64,10 +64,6 @@ class RatingUIStateViewModel @Inject constructor() : ViewModel() {
                     }
                     when (currentSelectionCount[position]) {
                         0 -> {
-                            label.value = "Bad"
-                        }
-
-                        1 -> {
                             label.value = "Bad"
                         }
 
