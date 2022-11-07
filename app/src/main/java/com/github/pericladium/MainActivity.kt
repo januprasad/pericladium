@@ -31,14 +31,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.pericladium.ui.theme.PericladiumTheme
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -54,28 +55,30 @@ class MainActivity : ComponentActivity() {
                         uiViewModel.ratingUIState
                     }
 
-                    val displayLabel1 by remember {
-                        uiState.snapshotRatingUIStateList[0].displayLabel
-                    }
-
-                    val displayLabel2 by remember {
-                        uiState.snapshotRatingUIStateList[1].displayLabel
-                    }
-
-                    Column(modifier = Modifier.fillMaxSize().padding(10.dp)) {
-                        RatingStar(uiState.snapshotRatingUIStateList[0]) { state ->
-                            uiViewModel.onUIEvent(state, 0)
+                    Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+                        repeat(uiState.snapshotRatingUIStateList.size) { item ->
+                            RatingApp(uiState.snapshotRatingUIStateList[item]) {
+                                uiViewModel.onUIEvent(it, item)
+                            }
                         }
-                        Text(text = displayLabel1, style = MaterialTheme.typography.headlineLarge)
-                        RatingStar(uiState.snapshotRatingUIStateList[1]) { state ->
-                            uiViewModel.onUIEvent(state, 1)
-                        }
-                        Text(text = displayLabel2, style = MaterialTheme.typography.headlineLarge)
                     }
                 }
             }
         }
     }
+}
+
+@ExperimentalAnimationApi
+@Composable
+fun RatingApp(ratingUIState: RatingUIState, callback: (UIEvent.InputEvents) -> Unit) {
+    RatingStar(ratingUIState) { state ->
+        callback(state)
+    }
+    Text(
+        text = ratingUIState.displayLabel.value,
+        style = MaterialTheme.typography.bodyLarge,
+        fontFamily = FontFamily.Serif
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -87,9 +90,9 @@ fun RatingStar(uiState: RatingUIState, callback: (UIEvent.InputEvents) -> Unit) 
             .fillMaxWidth()
     ) {
         repeat(count) {
+            val item = uiState.snapshotStateList[it]
             Box(
                 modifier = Modifier.size(60.dp).clickable {
-                    val item = uiState.snapshotStateList[it]
                     if (item.isSelected) {
                         callback(UIEvent.InputEvents.UnSelect(it))
                     } else {
@@ -98,33 +101,27 @@ fun RatingStar(uiState: RatingUIState, callback: (UIEvent.InputEvents) -> Unit) 
                 },
                 contentAlignment = Alignment.Center
             ) {
-                val item = uiState.snapshotStateList[it]
-                if (item.isSelected) {
-                    Image(
-                        modifier = Modifier
-                            .size(40.dp),
-                        painter = painterResource(id = R.drawable.star),
-                        contentDescription = "beer_bottle",
-                        colorFilter = ColorFilter.tint(Color.Red)
-                    )
+                val icon = if (item.isSelected) {
+                    R.drawable.star
                 } else {
-                    AnimatedContent(
-                        targetState = item,
-                        transitionSpec = {
-                            addAnimation().using(
-                                SizeTransform(clip = false)
-                            )
-                        }
-                    ) { value ->
-                        Image(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .padding(top = 6.dp),
-                            painter = painterResource(id = R.drawable.unstar),
-                            contentDescription = "beer_bottle",
-                            colorFilter = ColorFilter.tint(Color.Red)
+                    R.drawable.unstar
+                }
+                AnimatedContent(
+                    targetState = item,
+                    transitionSpec = {
+                        addAnimation().using(
+                            SizeTransform(clip = false)
                         )
                     }
+                ) { value ->
+                    Image(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(top = 6.dp),
+                        painter = painterResource(id = icon),
+                        contentDescription = "beer_bottle",
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+                    )
                 }
             }
         }
