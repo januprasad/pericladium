@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,7 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.pericladium.ui.theme.PericladiumTheme
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalAnimationApi::class)
+    @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,7 +57,7 @@ class MainActivity : ComponentActivity() {
                         uiViewModel.ratingUIState
                     }
 
-                    Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                         repeat(uiState.snapshotRatingUIStateList.size) { item ->
                             RatingApp(uiState.snapshotRatingUIStateList[item]) {
                                 uiViewModel.onUIEvent(it, item)
@@ -68,17 +70,21 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalAnimationApi
 @Composable
 fun RatingApp(ratingUIState: RatingUIState, callback: (UIEvent.InputEvents) -> Unit) {
-    RatingStar(ratingUIState) { state ->
-        callback(state)
+    Card(modifier = Modifier.wrapContentSize().padding(16.dp)) {
+        RatingStar(ratingUIState) { state ->
+            callback(state)
+        }
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = ratingUIState.displayLabel.value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontFamily = FontFamily.Serif
+        )
     }
-    Text(
-        text = ratingUIState.displayLabel.value,
-        style = MaterialTheme.typography.bodyLarge,
-        fontFamily = FontFamily.Serif
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -87,7 +93,7 @@ fun RatingStar(uiState: RatingUIState, callback: (UIEvent.InputEvents) -> Unit) 
     val count = uiState.snapshotStateList.size
     Row(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth().padding(8.dp)
     ) {
         repeat(count) {
             val item = uiState.snapshotStateList[it]
@@ -116,8 +122,7 @@ fun RatingStar(uiState: RatingUIState, callback: (UIEvent.InputEvents) -> Unit) 
                 ) { value ->
                     Image(
                         modifier = Modifier
-                            .size(40.dp)
-                            .padding(top = 6.dp),
+                            .size(40.dp),
                         painter = painterResource(id = icon),
                         contentDescription = "beer_bottle",
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
