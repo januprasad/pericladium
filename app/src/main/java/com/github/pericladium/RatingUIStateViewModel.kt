@@ -9,11 +9,9 @@ import javax.inject.Inject
 
 fun getRatingList(): SnapshotStateList<RatingIcon> {
     val ratingList = mutableStateListOf<RatingIcon>()
-    ratingList.add(RatingIcon())
-    ratingList.add(RatingIcon())
-    ratingList.add(RatingIcon())
-    ratingList.add(RatingIcon())
-    ratingList.add(RatingIcon())
+    repeat(5) {
+        ratingList.add(RatingIcon())
+    }
     return ratingList
 }
 
